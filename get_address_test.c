@@ -35,30 +35,36 @@ struct AddrInfo {
     unsigned long int phys_addr;
 };
 
+unsigned long int get_phys_addr(unsigned long int virt_addr) {
+    struct AddrInfo addr_info;
+    addr_info.virt_addr = virt_addr;
+
+    syscall(__NR_get_address, BY_VIRTUAL_ADDRESS, (void *) &addr_info);
+    
+    return addr_info.phys_addr;
+}
+
 int main() {
     struct ProcessSegments process_segs;
     process_segs.pid = getpid();
 
     syscall(__NR_get_address, BY_SEGMENT, (void *) &process_segs);
-    printf("%s: %lx-%lx\n", process_segs.code_seg.seg_name, process_segs.code_seg.start_addr, process_segs.code_seg.end_addr);
-    printf("%s: %lx-%lx\n", process_segs.data_seg.seg_name, process_segs.data_seg.start_addr, process_segs.data_seg.end_addr);
-    printf("%s: %lx-%lx\n", process_segs.heap_seg.seg_name, process_segs.heap_seg.start_addr, process_segs.heap_seg.end_addr);
-    printf("%s: %lx-%lx\n", process_segs.stack_seg.seg_name, process_segs.stack_seg.start_addr, process_segs.stack_seg.end_addr);
+    
+    printf("%s: %lx-%lx (%lx-%lx)\n", process_segs.code_seg.seg_name, process_segs.code_seg.start_addr, process_segs.code_seg.end_addr, get_phys_addr(process_segs.code_seg.start_addr), get_phys_addr(process_segs.code_seg.end_addr));
+    printf("%s: %lx-%lx (%lx-%lx)\n", process_segs.data_seg.seg_name, process_segs.data_seg.start_addr, process_segs.data_seg.end_addr, get_phys_addr(process_segs.data_seg.start_addr), get_phys_addr(process_segs.data_seg.end_addr));
+    printf("%s: %lx-%lx (%lx-%lx)\n", process_segs.heap_seg.seg_name, process_segs.heap_seg.start_addr, process_segs.heap_seg.end_addr, get_phys_addr(process_segs.heap_seg.start_addr), get_phys_addr(process_segs.heap_seg.end_addr));
+    printf("%s: %lx-%lx (%lx-%lx)\n", process_segs.stack_seg.seg_name, process_segs.stack_seg.start_addr, process_segs.stack_seg.end_addr, get_phys_addr(process_segs.stack_seg.start_addr), get_phys_addr(process_segs.stack_seg.end_addr));
 
     for (int i = 0; i < process_segs.mmap_seg_count; i++) {
         if (strcmp(process_segs.mmap_segs[i].lib_name, "NULL") != 0) {
-            printf("%s (%s): %lx-%lx\n", process_segs.mmap_segs[i].seg_name, process_segs.mmap_segs[i].lib_name, process_segs.mmap_segs[i].start_addr, process_segs.mmap_segs[i].end_addr);
-        } else {
-            printf("%s: %lx-%lx\n", process_segs.mmap_segs[i].seg_name, process_segs.mmap_segs[i].start_addr, process_segs.mmap_segs[i].end_addr);
+            printf("%s (%s): %lx-%lx (%lx-%lx)\n", process_segs.mmap_segs[i].seg_name, process_segs.mmap_segs[i].lib_name, process_segs.mmap_segs[i].start_addr, process_segs.mmap_segs[i].end_addr, get_phys_addr(process_segs.mmap_segs[i].start_addr), get_phys_addr(process_segs.mmap_segs[i].end_addr));
+        } else {            
+            printf("%s: %lx-%lx (%lx-%lx)\n", process_segs.mmap_segs[i].seg_name, process_segs.mmap_segs[i].start_addr, process_segs.mmap_segs[i].end_addr, get_phys_addr(process_segs.mmap_segs[i].start_addr), get_phys_addr(process_segs.mmap_segs[i].end_addr));
         }
     }
 
     int local_var = 0;
-    struct AddrInfo addr_info;
-    addr_info.virt_addr = (unsigned long int) &local_var;
-
-    syscall(__NR_get_address, BY_VIRTUAL_ADDRESS, (void *) &addr_info);
-    printf("local_var: %lx => %lx\n", addr_info.virt_addr, addr_info.phys_addr);
+    printf("local_var: %lx (%lx)\n", (unsigned long int) &local_var, get_phys_addr((unsigned long int) &local_var));
 
     return 0;
 }
