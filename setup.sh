@@ -34,8 +34,8 @@ make -j$(nproc) CC='ccache gcc'
 make modules -j$(nproc) CC='ccache gcc'
 
 # install
-sudo make modules_install
-sudo make install
+sudo make modules_install -j$(nproc) CC='ccache gcc'
+sudo make install -j$(nproc) CC='ccache gcc'
 
 # modify grub settings and restart
 ## comment out these two:
