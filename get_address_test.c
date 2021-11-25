@@ -11,7 +11,7 @@ __thread int tls_var = 0;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #define __NR_get_address 449
-#define MAX_BUF_SIZE 32
+#define MAX_BUF_SIZE 128
 
 enum MODE {
     BY_SEGMENT = 0,

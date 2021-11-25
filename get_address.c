@@ -7,7 +7,7 @@
 #include <asm/errno.h>
 #include <asm/io.h>
 
-#define MAX_BUF_SIZE 32
+#define MAX_BUF_SIZE 128
 
 enum MODE {
     BY_SEGMENT = 0,
