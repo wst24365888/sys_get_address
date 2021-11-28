@@ -27,6 +27,8 @@ struct ProcessSegments {
     struct Segment data_seg;
     struct Segment heap_seg;
     struct Segment stack_seg;
+    struct Segment arg_seg;
+    struct Segment env_seg;
     struct Segment mmap_segs[MAX_BUF_SIZE];
     int mmap_seg_count;
 };
@@ -75,6 +77,16 @@ struct ProcessSegments* get_segments(void *__user des_addr) {
     process_segments->stack_seg.end_addr = (unsigned long int) (task->mm->start_stack + task->mm->stack_vm);
     strcpy(process_segments->stack_seg.seg_name, "stack_seg");
     strcpy(process_segments->stack_seg.lib_name, "NULL");
+
+    process_segments->arg_seg.start_addr = (unsigned long int) task->mm->arg_start;
+    process_segments->arg_seg.end_addr = (unsigned long int) task->mm->arg_end;
+    strcpy(process_segments->arg_seg.seg_name, "arg_seg");
+    strcpy(process_segments->arg_seg.lib_name, "NULL");
+
+    process_segments->env_seg.start_addr = (unsigned long int) task->mm->env_start;
+    process_segments->env_seg.end_addr = (unsigned long int) task->mm->env_end;
+    strcpy(process_segments->env_seg.seg_name, "env_seg");
+    strcpy(process_segments->env_seg.lib_name, "NULL");
 
     for (current_vm_area = task->mm->mmap; current_vm_area; current_vm_area = current_vm_area->vm_next)
     {
